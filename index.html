@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>NoteTaker</title>
+
+    <!-- Styling the page to feel like a single, clean document -->
+
+    <style>
+
+        :root {
+
+            --bg-color: #f8f8f8;
+
+            --header-bg: white;
+
+            --text-color: #333;
+
+            --border-color: #ddd;
+
+            --status-color: #777;
+
+            --footer-bg: #f0f0f0;
+
+        }
+
+
+
+        [data-theme="dark"] {
+
+            --bg-color: #1e1e1e;
+
+            --header-bg: #2d2d2d;
+
+            --text-color: #e0e0e0;
+
+            --border-color: #444;
+
+            --status-color: #aaa;
+
+            --footer-bg: #252525;
+
+        }
+
+        [data-theme="baby-ember"] {
+
+            --bg-color: #0E0F12;
+
+            --text-color: #F2F2F2;
+
+            --border-color: #16181D;
+
+            --header-bg: #16181D;
+
+            --status-color: #A8A8A8;
+
+            --accent-color: #FF9A3C;
+
+            --accent-glow: #FFC67A;
+
+            --glyph-color: #FFB45A;
+
+            --footer-bg: #121418;
+
+        }
+
+        [data-theme="blue-gremlin"] {
+
+            --bg-color: #0A0F18;
+
+            --text-color: #E8F1FF;
+
+            --border-color: #111A26;
+
+            --header-bg: #111A26;
+
+            --status-color: #9BB3CC;
+
+            --accent-color: #4DA3FF;
+
+            --accent-glow: #8BC7FF;
+
+            --glyph-color: #5FB8FF;
+
+            --footer-bg: #0D121E;
+
+        }
+
+        [data-theme="mint-mischief"] {
+
+            --bg-color: #0D1113;
+
+            --text-color: #E6FFFA;
+
+            --border-color: #151A1C;
+
+            --header-bg: #151A1C;
+
+            --status-color: #9EC7BC;
+
+            --accent-color: #4EF2C3;
+
+            --accent-glow: #A0FFE6;
+
+            --glyph-color: #5FF7D0;
+
+            --footer-bg: #101517;
+
+        }
+
+        [data-theme="arcane-scribble"] {
+
+            --bg-color: #0C0A12;
+
+            --text-color: #F3EEFF;
+
+            --border-color: #15121F;
+
+            --header-bg: #15121F;
+
+            --status-color: #AFA3D6;
+
+            --accent-color: #8A6FF0;
+
+            --accent-glow: #C7B6FF;
+
+            --glyph-color: #A88CFF;
+
+            --footer-bg: #110E1A;
+
+        }
+
+
+
+        body {
+
+            margin: 0;
+
+            padding: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 0;
+
+            height: 100vh;
+
+            box-sizing: border-box;
+
+            background-color: var(--bg-color);
+
+            color: var(--text-color);
+
+            transition: background-color 0.3s, color 0.3s;
+
+            overflow: hidden;
+
+        }
+
+        .main-container {
+
+            display: flex;
+
+            flex: 1;
+
+            overflow: hidden;
+
+        }
+
+        .sidebar {
+
+            width: 250px;
+
+            min-width: 150px;
+
+            max-width: 500px;
+
+            padding: 15px;
+
+            border-right: 1px solid var(--border-color);
+
+            background-color: var(--header-bg);
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+
+            overflow-y: auto;
+
+            transition: background-color 0.3s, border-color 0.3s;
+
+            resize: horizontal;
+
+            overflow: hidden;
+
+        }
+
+        .resize-handle {
+
+            width: 5px;
+
+            background-color: var(--border-color);
+
+            cursor: col-resize;
+
+            transition: background-color 0.2s;
+
+        }
+
+        .resize-handle:hover {
+
+            background-color: var(--text-color);
+
+        }
+
+        .sidebar-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding-bottom: 10px;
+
+            border-bottom: 1px solid var(--border-color);
+
+        }
+
+        .sidebar-header h2 {
+
+            font-size: 16px;
+
+            margin: 0;
+
+        }
+
+        #note-list {
+
+            flex: 1;
+
+            overflow-y: auto;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 5px;
+
+        }
+
+        .note-item {
+
+            padding: 10px;
+
+            border-radius: 4px;
+
+            cursor: pointer;
+
+            transition: background-color 0.2s;
+
+            border: 1px solid transparent;
+
+        }
+
+        .note-item:hover {
+
+            background-color: var(--border-color);
+
+        }
+
+        .note-item.active {
+
+            background-color: var(--border-color);
+
+            border-color: var(--text-color);
+
+        }
+
+        .note-item-title {
+
+            font-weight: bold;
+
+            font-size: 14px;
+
+            margin-bottom: 4px;
+
+        }
+
+        .note-item-preview {
+
+            font-size: 12px;
+
+            color: var(--status-color);
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+        }
+
+        .note-item-date {
+
+            font-size: 10px;
+
+            color: var(--status-color);
+
+            margin-top: 4px;
+
+        }
+
+        .note-item-tags {
+
+            font-size: 10px;
+
+            color: var(--status-color);
+
+            margin-top: 4px;
+
+            display: flex;
+
+            gap: 4px;
+
+            flex-wrap: wrap;
+
+        }
+
+        .tag {
+
+            background-color: var(--border-color);
+
+            padding: 2px 6px;
+
+            border-radius: 3px;
+
+        }
+
+        .note-item-actions {
+
+            display: flex;
+
+            gap: 5px;
+
+            margin-top: 5px;
+
+        }
+
+        .note-item-actions button {
+
+            padding: 2px 8px;
+
+            font-size: 11px;
+
+            margin: 0;
+
+        }
+
+        .editor-container {
+
+            flex: 1;
+
+            display: flex;
+
+            flex-direction: column;
+
+            padding: 20px;
+
+            overflow: hidden;
+
+        }
+
+        .note-meta {
+
+            font-size: 12px;
+
+            color: var(--status-color);
+
+            margin-bottom: 10px;
+
+            display: flex;
+
+            gap: 15px;
+
+            align-items: center;
+
+        }
+
+        .tags-input-container {
+
+            display: flex;
+
+            gap: 8px;
+
+            align-items: center;
+
+        }
+
+        #tags-input {
+
+            padding: 6px 10px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: 4px;
+
+            background-color: var(--bg-color);
+
+            color: var(--text-color);
+
+            outline: none;
+
+            font-size: 12px;
+
+            width: 200px;
+
+        }
+
+        #tags-input:focus {
+
+            border-color: var(--text-color);
+
+        }
+
+        .current-tags {
+
+            display: flex;
+
+            gap: 4px;
+
+            flex-wrap: wrap;
+
+        }
+
+        .current-tag {
+
+            background-color: var(--border-color);
+
+            padding: 4px 8px;
+
+            border-radius: 3px;
+
+            font-size: 11px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 4px;
+
+        }
+
+        .current-tag span {
+
+            cursor: pointer;
+
+            opacity: 0.6;
+
+        }
+
+        .current-tag span:hover {
+
+            opacity: 1;
+
+        }
+
+        header {
+
+            padding: 10px 20px;
+
+            border-bottom: 2px solid var(--border-color);
+
+            background-color: var(--header-bg);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            transition: background-color 0.3s, border-color 0.3s;
+
+            -webkit-app-region: drag;
+
+        }
+
+        header button {
+
+            -webkit-app-region: no-drag;
+
+        }
+
+        .window-controls {
+
+            display: flex;
+
+            gap: 5px;
+
+        }
+
+        .window-controls button {
+
+            padding: 6px 12px;
+
+            margin: 0;
+
+            font-size: 14px;
+
+        }
+
+        .settings-dropdown {
+
+            position: absolute;
+
+            top: 100%;
+
+            right: 0;
+
+            background-color: var(--header-bg);
+
+            border: 1px solid var(--border-color);
+
+            border-radius: 4px;
+
+            padding: 10px;
+
+            display: none;
+
+            flex-direction: column;
+
+            gap: 8px;
+
+            min-width: 200px;
+
+            z-index: 1000;
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+            transition: opacity 0.2s;
+
+        }
+
+        .settings-dropdown.active {
+
+            display: flex;
+
+        }
+
+        .settings-dropdown button {
+
+            text-align: left;
+
+            width: 100%;
+
+            margin: 0;
+
+        }
+
+        /* Scrapia Effects */
+
+        .scrapia-flicker-soft {
+
+            filter: brightness(1.05);
+
+        }
+
+        .scrapia-flicker-mid {
+
+            filter: brightness(1.15) contrast(1.05);
+
+        }
+
+        .scrapia-flicker-hard {
+
+            filter: brightness(1.25) contrast(1.1) hue-rotate(4deg);
+
+        }
+
+        .scrapia-wiggle-soft {
+
+            animation: scrapia-wiggle 0.18s ease-out;
+
+        }
+
+        .scrapia-wiggle-mid {
+
+            animation: scrapia-wiggle 0.22s ease-out;
+
+        }
+
+        .scrapia-wiggle-hard {
+
+            animation: scrapia-wiggle 0.26s ease-out;
+
+        }
+
+        @keyframes scrapia-wiggle {
+
+            0%   { transform: translateX(0); }
+
+            25%  { transform: translateX(-1px); }
+
+            50%  { transform: translateX(1px); }
+
+            75%  { transform: translateX(-1px); }
+
+            100% { transform: translateX(0); }
+
+        }
+
+        .scrapia-text-jitter {
+
+            animation: scrapia-text-jitter 0.22s ease-out;
+
+        }
+
+        @keyframes scrapia-text-jitter {
+
+            0%   { letter-spacing: 0; }
+
+            50%  { letter-spacing: 0.06em; }
+
+            100% { letter-spacing: 0; }
+
+        }
+
+        /* Mint Mischief Effects */
+
+        .mint-pulse-flicker {
+
+            filter: brightness(1.08) hue-rotate(6deg);
+
+            transition: filter 0.16s ease-out;
+
+        }
+
+        .mint-hop {
+
+            animation: mintHop 0.16s cubic-bezier(.25,1.5,.5,1);
+
+        }
+
+        @keyframes mintHop {
+
+            0%   { transform: translateY(0); }
+
+            40%  { transform: translateY(-2px); }
+
+            100% { transform: translateY(0); }
+
+        }
+
+        .mint-wiggle {
+
+            animation: mintWiggle 0.20s ease-out;
+
+        }
+
+        @keyframes mintWiggle {
+
+            0%   { transform: translateX(0); }
+
+            25%  { transform: translateX(-1px); }
+
+            50%  { transform: translateX(1px); }
+
+            75%  { transform: translateX(-1px); }
+
+            100% { transform: translateX(0); }
+
+        }
+
+        .mint-tilt {
+
+            animation: mintTilt 0.14s ease-out;
+
+        }
+
+        @keyframes mintTilt {
+
+            0%   { transform: rotate(0deg); }
+
+            50%  { transform: rotate(1.5deg); }
+
+            100% { transform: rotate(0deg); }
+
+        }
+
+        .mint-letter-hop {
+
+            display: inline-block;
+
+            animation: mintLetterHop 0.18s ease-out;
+
+        }
+
+        @keyframes mintLetterHop {
+
+            0%   { transform: translateY(0); }
+
+            40%  { transform: translateY(-2px); }
+
+            100% { transform: translateY(0); }
+
+        }
+
+        .mint-jitter {
+
+            animation: mintJitter 0.22s ease-out;
+
+        }
+
+        @keyframes mintJitter {
+
+            0%   { letter-spacing: 0; }
+
+            50%  { letter-spacing: 0.06em; }
+
+            100% { letter-spacing: 0; }
+
+        }
+
+        .mint-distort {
+
+            filter: blur(1px) hue-rotate(4deg) brightness(1.05);
+
+            transition: filter 0.14s ease-out;
+
+        }
+
+        .mint-cursor-excited * {
+
+            caret-color: #7fffd4;
+
+            animation: mintCursorBlink 0.5s step-end infinite;
+
+        }
+
+        @keyframes mintCursorBlink {
+
+            50% { opacity: 0; }
+
+        }
+
+        .scrapia-speech-bubble {
+
+            position: absolute;
+
+            bottom: 60px;
+
+            left: 20px;
+
+            padding: 6px 10px;
+
+            font-size: 0.75rem;
+
+            border-radius: 8px;
+
+            pointer-events: none;
+
+            /* THE FIXES */
+
+            overflow: hidden;              /* prevents ghost lines */
+
+            will-change: opacity, transform; /* smooth fade-out */
+
+        }
+
+        .scrapia-speech-bubble.fade-out {
+
+            opacity: 0;
+
+            transition: opacity 0.3s ease-out;
+
+        }
+
+        @keyframes bubblePop {
+
+            0%   { transform: scale(0.6) rotate(-4deg); opacity: 0; }
+
+            60%  { transform: scale(1.05) rotate(1deg); opacity: 1; }
+
+            100% { transform: scale(1) rotate(0deg); }
+
+        }
+
+        .scrapia-speech-bubble.fade-out {
+
+            opacity: 0;
+
+            transition: opacity 0.3s ease-out;
+
+        }
+
+        .bubble-mint {
+
+            background: rgba(120, 255, 220, 0.85);
+
+            color: #003322;
+
+            animation: bubbleMintWiggle 0.25s ease-out;
+
+        }
+
+        @keyframes bubbleMintWiggle {
+
+            0% { transform: scale(0.9) rotate(-2deg); }
+
+            50% { transform: scale(1.05) rotate(1deg); }
+
+            100% { transform: scale(1) rotate(0deg); }
+
+        }
+
+        .bubble-gremlin {
+
+            background: rgba(80, 180, 255, 0.85);
+
+            color: #001a33;
+
+            animation: bubbleGremlinJitter 0.25s ease-out;
+
+        }
+
+        @keyframes bubbleGremlinJitter {
+
+            0% { transform: translate(0,0); }
+
+            25% { transform: translate(-1px,0); }
+
+            50% { transform: translate(1px,0); }
+
+            75% { transform: translate(-1px,0); }
+
+            100% { transform: translate(0,0); }
+
+        }
+
+        .bubble-arcane {
+
+            background: linear-gradient(135deg, rgba(150, 120, 255, 0.85), rgba(90, 60, 180, 0.85));
+
+            color: #1a0033;
+
+            animation: bubbleArcanePulse 0.3s ease-out;
+
+        }
+
+        @keyframes bubbleArcanePulse {
+
+            0% { filter: blur(2px) brightness(0.8); transform: scale(0.9) rotate(-3deg); }
+
+            100% { filter: blur(0) brightness(1); transform: scale(1) rotate(0deg); }
+
+        }
+
+        .bubble-ember {
+
+            background: rgba(255, 180, 120, 0.85);
+
+            color: #331a00;
+
+            animation: bubbleEmberWarm 0.25s ease-out;
+
+        }
+
+        @keyframes bubbleEmberWarm {
+
+            0% { transform: scale(0.8); filter: brightness(0.9); }
+
+            50% { transform: scale(1.05); filter: brightness(1.1); }
+
+            100% { transform: scale(1); filter: brightness(1); }
+
+        }
+
+        .bubble-spiral {
+
+            animation: bubbleSpiral 0.25s ease-out;
+
+        }
+
+        @keyframes bubbleSpiral {
+
+            0% { transform: scale(0.8) rotate(-6deg); }
+
+            50% { transform: scale(1.1) rotate(3deg); }
+
+            100% { transform: scale(1) rotate(0deg); }
+
+        }
+
+        h1 {
+
+            font-size: 24px;
+
+            margin: 0;
+
+        }
+
+        #note-area {
+
+            flex-grow: 1;
+
+            width: 100%;
+
+            padding: 20px;
+
+            border: none;
+
+            resize: none;
+
+            font-size: 16px;
+
+            line-height: 1.5;
+
+            outline: none;
+
+            background-color: var(--bg-color);
+
+            color: var(--text-color);
+
+            transition: background-color 0.3s, color 0.3s;
+
+            scrollbar-width: none;
+
+        }
+
+        #note-area::-webkit-scrollbar {
+
+            display: none;
+
+        }
+
+        .search-container {
+
+            padding: 10px 0;
+
+        }
+
+        #search-input {
+
+            width: 100%;
+
+            padding: 8px 15px;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: 4px;
+
+            background-color: var(--bg-color);
+
+            color: var(--text-color);
+
+            outline: none;
+
+            transition: border-color 0.3s, background-color 0.3s;
+
+            box-sizing: border-box;
+
+        }
+
+        #search-input:focus {
+
+            border-color: var(--text-color);
+
+        }
+
+        .markdown-preview {
+
+            flex-grow: 1;
+
+            padding: 20px;
+
+            overflow-y: auto;
+
+            border: 1px solid var(--border-color);
+
+            border-radius: 4px;
+
+            display: none;
+
+        }
+
+        .markdown-preview.active {
+
+            display: block;
+
+        }
+
+        .markdown-preview h1 { font-size: 24px; margin: 0.5em 0; }
+
+        .markdown-preview h2 { font-size: 20px; margin: 0.5em 0; }
+
+        .markdown-preview h3 { font-size: 16px; margin: 0.5em 0; }
+
+        .markdown-preview strong { font-weight: bold; }
+
+        .markdown-preview em { font-style: italic; }
+
+        .markdown-preview code { background-color: var(--border-color); padding: 2px 4px; border-radius: 3px; }
+
+        .markdown-preview pre { background-color: var(--border-color); padding: 10px; border-radius: 4px; overflow-x: auto; }
+
+        .markdown-preview ul, .markdown-preview ol { padding-left: 20px; }
+
+        .markdown-preview blockquote { border-left: 3px solid var(--border-color); padding-left: 10px; margin-left: 0; color: var(--status-color); }
+
+        #status-bar {
+
+            padding: 8px 15px;
+
+            color: var(--status-color);
+
+            transition: color 0.3s, background-color 0.3s, border-color 0.3s;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            position: relative;
+
+            background-color: var(--footer-bg);
+
+            border-top: 1px solid var(--border-color);
+
+            font-size: 12px;
+
+        }
+
+        #status-text {
+
+            position: absolute;
+
+            left: 15px;
+
+        }
+
+        button {
+
+            padding: 8px 16px;
+
+            margin-left: 8px;
+
+            border: none;
+
+            border-radius: 4px;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            background-color: var(--header-bg);
+
+            color: var(--text-color);
+
+            border: 1px solid var(--border-color);
+
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+
+        }
+
+        button:hover {
+
+            opacity: 0.8;
+
+        }
+
+    </style>
+
+</head>
+
+
+
+<body id="app-root">
+
+
+
+    <header>
+
+        <div class="window-controls">
+
+            <button id="minimizeButton">─</button>
+
+            <button id="maximizeButton">□</button>
+
+            <button id="closeButton">✕</button>
+
+        </div>
+
+        <h1>⟡· Scrapia — Scrappy's Baby Bro.! (Note Gremlin)</h1>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+
+            <button id="fontDecrease">A-</button>
+
+            <button id="fontIncrease">A+</button>
+
+            <div style="position: relative;">
+
+                <button id="settingsButton">⚙️ Settings</button>
+
+                <div id="settingsDropdown" class="settings-dropdown">
+
+                    <button id="undoButton">↶ Undo</button>
+
+                    <button id="redoButton">↷ Redo</button>
+
+                    <button id="newNoteButton">➕ New Note</button>
+
+                    <button id="saveButton">💾 Save Note</button>
+
+                    <button id="syncSaveButton">☁️ Sync Save</button>
+
+                    <button id="syncLoadButton">📂 Sync Load</button>
+
+                    <button id="exportButton">📤 Export</button>
+
+                    <button id="previewButton">👁️ Preview</button>
+
+                    <div style="border-top: 1px solid var(--border-color); margin: 8px 0;"></div>
+
+                    <button id="scrapiaToggle">⟡· Scrapia: OFF</button>
+
+                    <button id="themeToggle">🌙 Dark Mode</button>
+
+                    <div style="font-size: 12px; color: var(--status-color); margin-bottom: 4px;">Theme:</div>
+
+                    <select id="themeSelector" style="width: 100%; padding: 6px; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 4px;">
+
+                        <option value="baby-ember">🔥 Baby Ember</option>
+
+                        <option value="blue-gremlin">💙 Blue Gremlin</option>
+
+                        <option value="mint-mischief">💚 Mint Mischief</option>
+
+                        <option value="arcane-scribble">💜 Arcane Scribble</option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    
+
+    <div class="main-container">
+
+        <div class="sidebar">
+
+            <div class="sidebar-header">
+
+                <h2>📝 Notes</h2>
+
+            </div>
+
+            <div class="search-container">
+
+                <input type="text" id="search-input" placeholder="Search notes...">
+
+            </div>
+
+            <div id="note-list"></div>
+
+        </div>
+
+        <div class="resize-handle" id="resize-handle"></div>
+
+        <div class="editor-container">
+
+            <div class="note-meta">
+
+                <span id="note-created">Created: -</span>
+
+                <span id="note-modified">Modified: -</span>
+
+                <div class="tags-input-container">
+
+                    <input type="text" id="tags-input" placeholder="Add tag (press Enter)...">
+
+                </div>
+
+            </div>
+
+            <div class="current-tags" id="current-tags"></div>
+
+            <textarea id="note-area" placeholder="Start typing your notes here..."></textarea>
+
+            <div id="markdown-preview" class="markdown-preview"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Status Bar (e.g., showing save status) -->
+
+    <div id="status-bar">
+        <span id="status-text">Ready.</span>
+        <div style="display: flex; justify-content: center;">
+            <span id="cursor-position">Ln 1, Col 1</span>
+        </div>
+    </div>
+
+
+
+    <script src="./scrapiaEngine.js"></script>
+
+    <script src="./scrapiaMoodSystem.js"></script>
+
+    <script src="./scrapiaMintMischief.js"></script>
+
+    <script src="./scrapiaConversationEngine.js"></script>
+
+    <script src="./scrapricTranslator.js"></script>
+
+    <script src="./renderer.js"></script>
+
+</body>
+
+</html>
+
+
+
+
+

@@ -1,0 +1,19 @@
+{
+  "name": "electron-notetaker",
+  "version": "1.0.0",
+  "description": "A frameless Electron Note Taker.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "electron",
+    "notes"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^41.2.2"
+  },
+  "type": "commonjs"
+}
